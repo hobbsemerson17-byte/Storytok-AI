@@ -15,7 +15,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
 app.use(cors());
 app.use(express.json());
@@ -40,6 +40,15 @@ app.use('/api/videos', videoRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'StoryTok AI server is running' });
+});
+
+// --- Production: serve built frontend ---
+const distPath = path.join(__dirname, '..', 'dist');
+app.use(express.static(distPath));
+
+// SPA catch-all: any non-API route serves index.html so React Router works
+app.get('*', (req, res) => {
+  res.sendFile(path.join(distPath, 'index.html'));
 });
 
 app.listen(PORT, () => {
